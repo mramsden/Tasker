@@ -19,7 +19,7 @@
 	</dependencies>
 	
 	<build>
-		<sourceDirectory>source</sourceDirectory>
+		<sourceDirectory>src</sourceDirectory>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
