@@ -56,6 +56,12 @@ public class TasksDbAdapter {
 		this.mCtx = ctx;
 	}
 	
+	public TasksDbAdapter open() throws SQLException {
+		mDbHelper = new DatabaseHelper(mCtx);
+		mDb = mDbHelper.getWritableDatabase();
+		return this;
+	}
+	
 	public void close() {
 		mDbHelper.close();
 	}

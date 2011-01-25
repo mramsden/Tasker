@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Tasker</string>
+    <string name="no_tasks">No Tasks</string>
+    <string name="menu_insert">Add Task</string>
 </resources>
