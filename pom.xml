@@ -35,7 +35,7 @@
 				<configuration>
 					<sdk>
 						<path>${env.ANDROID_HOME}</path>
-						<platform>2.3</platform>
+						<platform>2.3.1</platform>
 					</sdk>
 					<emulator>
 						<avd>standard</avd>

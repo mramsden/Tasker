@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.util.Log;
 
 public class TaskEdit extends Activity {
 	
@@ -14,6 +15,8 @@ public class TaskEdit extends Activity {
 	private Long mRowId;
 	
 	private TasksDbAdapter mDbHelper;
+	
+	private static final String TAG = "TaskEdit";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +69,7 @@ public class TaskEdit extends Activity {
 	}
 	
 	private void populateFields() {
-		if (mRowId != null) {
+		if (!isNewTask()) {
 			Cursor task = mDbHelper.fetchTask(mRowId);
 			startManagingCursor(task);
 			mTitleText.setText(task.getString(task.getColumnIndexOrThrow(TasksDbAdapter.KEY_TITLE)));
@@ -86,5 +89,9 @@ public class TaskEdit extends Activity {
 		} else {
 			mDbHelper.updateTask(mRowId, title, body);
 		}
+	}
+	
+	private boolean isNewTask() {
+		return mRowId == null;
 	}
 }

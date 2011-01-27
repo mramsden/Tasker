@@ -1,17 +1,25 @@
 package com.example.tasker;
 
 import android.app.ListActivity;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.ArrayAdapter;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.TextView;
+
+import java.util.ArrayList;
 
 public class Tasker extends ListActivity {
 	private static final int ACTIVITY_CREATE = 0;
@@ -21,6 +29,9 @@ public class Tasker extends ListActivity {
 	private static final int DELETE_ID = Menu.FIRST + 1;
 	
 	private TasksDbAdapter mDbHelper;
+	private TaskService mTaskService;
+	
+	private TaskAdapter mListAdapter;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -28,8 +39,14 @@ public class Tasker extends ListActivity {
         setContentView(R.layout.task_list);
 		mDbHelper = new TasksDbAdapter(this);
 		mDbHelper.open();
-		fillData();
-		registerForContextMenu(getListView());
+		
+		mTaskService = new TaskService(mDbHelper);
+		
+		//mListAdapter = new TaskAdapter(this, R.layout.task_row, mTaskService.fetchAllTasks());
+		
+		ProgressDialog.show(Tasker.this, "Please wait...", "Retrieving tasks...", true);
+		
+		//registerForContextMenu(getListView());
     }
 
 	@Override
@@ -97,5 +114,35 @@ public class Tasker extends ListActivity {
 		SimpleCursorAdapter notes = 
 			new SimpleCursorAdapter(this, R.layout.task_row, c, from, to);
 		setListAdapter(notes);
+		
+		ArrayList<Task> tasks = mTaskService.fetchAllTasks();
+	}
+	
+	private class TaskAdapter extends ArrayAdapter<Task> {
+		private ArrayList<Task> mItems;
+		
+		public TaskAdapter(Context context, int textViewResourceId, ArrayList<Task> items) {
+			super(context, textViewResourceId, items);
+			mItems = items;
+		}
+		
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View v = convertView;
+			if (v == null) {
+				LayoutInflater vi = (LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE);
+				v = vi.inflate(R.layout.task_row, null);
+			}
+			
+			Task t = mItems.get(position);
+			if (t != null) {
+				TextView tt = (TextView)v.findViewById(R.id.text1);
+				if (tt != null) {
+					tt.setText(t.getTitle());
+				}
+			}
+			
+			return v;
+		}
 	}
 }
