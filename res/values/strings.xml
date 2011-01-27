@@ -10,4 +10,7 @@
 		<string name="date_due">Date Due</string>
 		<string name="set_date">Set Date</string>
 		<string name="edit_task">Edit Task</string>
+		
+		<string name="loading_title">Loading</string>
+		<string name="loading_tasks_message">Loading tasks...</string>
 </resources>

@@ -13,13 +13,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.lang.Runnable;
+import java.lang.Thread;
 
 public class Tasker extends ListActivity {
 	private static final int ACTIVITY_CREATE = 0;
@@ -28,10 +31,16 @@ public class Tasker extends ListActivity {
 	private static final int INSERT_ID = Menu.FIRST;
 	private static final int DELETE_ID = Menu.FIRST + 1;
 	
+	private static final String TAG = "Tasker";
+	
 	private TasksDbAdapter mDbHelper;
 	private TaskService mTaskService;
+	private ArrayList<Task> mTasks;
 	
 	private TaskAdapter mListAdapter;
+	private Runnable viewTasks;
+	
+	private ProgressDialog mProgressDialog;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,11 +51,20 @@ public class Tasker extends ListActivity {
 		
 		mTaskService = new TaskService(mDbHelper);
 		
-		//mListAdapter = new TaskAdapter(this, R.layout.task_row, mTaskService.fetchAllTasks());
+		mListAdapter = new TaskAdapter(this, R.layout.task_row, mTaskService.fetchAllTasks());
 		
-		ProgressDialog.show(Tasker.this, "Please wait...", "Retrieving tasks...", true);
+		registerForContextMenu(getListView());
 		
-		//registerForContextMenu(getListView());
+		// Create the view tasks thread which is responsible
+		// for loading tasks from the datasource.
+		viewTasks = new Runnable() {
+			@Override
+			public void run() {
+				getTasks();
+			}
+		};
+		Thread thread = new Thread(null, viewTasks, "BackgroundTaskLoader");
+		thread.start();
     }
 
 	@Override
@@ -79,7 +97,6 @@ public class Tasker extends ListActivity {
 			case DELETE_ID:
 				AdapterContextMenuInfo info = (AdapterContextMenuInfo)item.getMenuInfo();
 				mDbHelper.deleteTask(info.id);
-				fillData();
 				return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -96,27 +113,46 @@ public class Tasker extends ListActivity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		super.onActivityResult(requestCode, resultCode, intent);
-		fillData();
+		Thread thread = new Thread(null, viewTasks, "BackgroundTaskLoader");
+		thread.start();
 	}
 	
 	private void createTask() {
 		Intent i = new Intent(this, TaskEdit.class);
 		startActivityForResult(i, ACTIVITY_CREATE);
 	}
-
-	private void fillData() {
-		Cursor c = mDbHelper.fetchAllTasks();
-		startManagingCursor(c);
-		
-		String[] from = new String[] { TasksDbAdapter.KEY_TITLE };
-		int[] to = new int[] { R.id.text1 };
-		
-		SimpleCursorAdapter notes = 
-			new SimpleCursorAdapter(this, R.layout.task_row, c, from, to);
-		setListAdapter(notes);
-		
-		ArrayList<Task> tasks = mTaskService.fetchAllTasks();
+	
+	private void getTasks() {
+		Log.i(TAG, "Loading tasks");
+		runOnUiThread(displayLoadingMessage);
+		mTasks = mTaskService.fetchAllTasks();
+		runOnUiThread(returnTasks);
 	}
+	
+	// This is used to respond to a call from getTasks.
+	private Runnable returnTasks = new Runnable() {
+		@Override
+		public void run() {
+			Log.i(TAG, "Tasks loaded");
+			mProgressDialog.dismiss();
+			if (mTasks != null && mTasks.size() > 0) {
+				mListAdapter.notifyDataSetChanged();
+				for (Task task : mTasks) {
+					mListAdapter.add(task);
+				}
+				mListAdapter.notifyDataSetChanged();
+			}
+		}
+	};
+	
+	private Runnable displayLoadingMessage = new Runnable() {
+		@Override
+		public void run() {
+			Log.i(TAG, "Display loading message");
+			mProgressDialog = null;
+			mProgressDialog = ProgressDialog.show(Tasker.this, getString(R.string.loading_title), getString(R.string.loading_tasks_message), true);
+		}
+	};
 	
 	private class TaskAdapter extends ArrayAdapter<Task> {
 		private ArrayList<Task> mItems;
