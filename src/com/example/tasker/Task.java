@@ -22,7 +22,7 @@ public class Task {
         this.body = body;
     }
 
-    public Tasks(String title) {
+    public Task(String title) {
         this.title = title;
     }
 
