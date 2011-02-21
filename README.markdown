@@ -24,7 +24,7 @@ To run an emulator you will need to use the following command;
 
 This will try to start an avd called 'Android-2-3-3' as defined in the properties section of the pom.xml file. If you want to start your own avd then run the following command;
 
-    mvn android:emulator-startd -Demulator.avd=my-avd
+    mvn android:emulator-start -Demulator.avd=my-avd
 
 Once you have an emulator started or a device connected then you can run;
 
