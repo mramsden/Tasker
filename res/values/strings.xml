@@ -3,9 +3,10 @@
     <string name="app_name">Tasker</string>
     <string name="no_tasks">No Tasks</string>
     <string name="menu_insert">Add Task</string>
-		<string name="menu_delete">Delete Task</string>
-		<string name="title">Title</string>
-		<string name="body">Body</string>
-		<string name="confirm">Confirm</string>
-		<string name="edit_task">Edit Task</string>
+    <string name="menu_delete">Delete Task</string>
+	<string name="title">Title</string>
+	<string name="body">Body</string>
+	<string name="confirm">Confirm</string>
+	<string name="edit_task">Edit Task</string>
+    <string name="delete">Delete</string>
 </resources>
